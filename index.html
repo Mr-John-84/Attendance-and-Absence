@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حضور خدمة إعدادي بنين</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        h2 { text-align: center; color: var(--primary-color); margin-bottom: 5px; }
+        h4 { text-align: center; color: #666; margin-top: 0; margin-bottom: 20px; }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            background: #e9ecef;
+            color: #495057;
+            font-weight: bold;
+            font-size: 15px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .meta-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .meta-fields input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: right; }
+        th { background-color: #f1f3f5; color: #333; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        
+        select.status-select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+        }
+        select.status-select[data-status="حضور"] { color: #2e7d32; background-color: #e8f5e9; }
+        select.status-select[data-status="غياب"] { color: #c62828; background-color: #ffebee; }
+        select.status-select[data-status="اعتذار"] { color: #ef6c00; background-color: #fff3e0; }
+
+        .note-input {
+            width: 90%;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-submit:hover { background: #1557b0; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>خدمة إعدادي بنين - كنيسة مارجرجس بشبين الكوم</h2>
+    <h4>  نظام تسجيل الحضور والغياب الأسبوعي  2026 / 2027</h4>
+
+    <!-- تبويبات الفصول -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchClass('grade1')">الصف الأول الإعدادي</button>
+        <button class="tab-btn" onclick="switchClass('grade2')">الصف الثاني الإعدادي</button>
+        <button class="tab-btn" onclick="switchClass('grade3')">الصف الثالث الإعدادي</button>
+    </div>
+
+    <form id="attendanceForm">
+        <div class="meta-fields">
+            <div>
+                <label style="display:block; font-size:12px; margin-bottom:4px; font-weight:bold;">تاريخ الجمعة:</label>
+                <input type="date" id="attendanceDate" required>
+            </div>
+            <div>
+                <label style="display:block; font-size:12px; margin-bottom:4px; font-weight:bold;">موضوع الدرس:</label>
+                <input type="text" id="lessonTopic" placeholder="موضوع الدرس" required>
+            </div>
+            <div>
+                <label style="display:block; font-size:12px; margin-bottom:4px; font-weight:bold;">خادم الدرس:</label>
+                <input type="text" id="servantName" placeholder="اسم الخادم القائم بالدرس" required>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">م</th>
+                        <th style="width: 40%;">اسم المخدوم</th>
+                        <th style="width: 20%;">الحالة</th>
+                        <th style="width: 35%;">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsList">
+                    <!-- تحميل الأسماء ديناميكياً -->
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">إرسال كشف الفصل للشيت</button>
+    </form>
+</div>
+
+<script>
+    const classData = {
+        grade1: {
+            name: "الصف الأول الإعدادي",
+            students: [
+                "فيلوباتير امونيوس القس غبريال", "متياس الياس اسكندر", "لوكاس الياس اسكندر", 
+                "باتريك بولس فتحي فهمي", "كارلوس ويصا القس غبريال", "كاراس هاني سعد", 
+                "اندريا فادي عادل صادق", "إيساف ايهاب ابراهيم", "فيلوباتير فادى فرج", 
+                "يوسف عاطف خليل", "كاراس كيرلس سعد", "كاراس ريمون", 
+                "إيفان نبيل عبد الستار", "بيير ايهاب", "ادم باسم وجيه شكرى", 
+                "شفيق عدلي شفيق", "شنودة ايمن عبد الشهيد عبد الملاك", "روبير تامر زخاري"
+            ]
+        },
+        grade2: {
+            name: "الصف الثاني الإعدادي",
+            students: [
+                "باتريك سامح صبحي", "بافلي جورج رفيق", "بولس مينا عاطف", 
+                "بولا ايمن ميلاد", "توماس هاني عبدالمسيح", "جاستن جون فريد", 
+                "جوني ماهر ألفي", "جوليان جورج فوزي", "ستيفن هاني نبيل", 
+                "شنوده سعد مجدي", "فيلوباتير معوض شوقي", "كاراس ريمون ماهر", 
+                "كاراس مينا ميخائيل", "كاراس بيتر عماد", "كاراس هاني عبد المسيح", 
+                "كيفن مايكل مجدي", "مانويل مينا ناجي", "مارك وائل نادي", 
+                "فادي عزمي ميخائيل", "روبير هاني ماهر", "رافائيل القس دانيال", 
+                "كيرلس عماد عوض الله"
+            ]
+        },
+        grade3: {
+            name: "الصف الثالث الإعدادي",
+            students: [
+                "ابانوب بيتر ناجي صموئيل", "ستيفن سامر سعيد", "اندرو امير ادوارد جرجس", 
+                "توماس ايهاب مجدي رزق", "جوفاني ميلاد وهيب فهمي", "جون فادي موريس فواد", 
+                "جيانو سامي سمير كامل", "صموئيل جون سامي", "كيرلس عادل معوض حنا", 
+                "مارفن مجدى عبده غبريال", "مارك تامر ميشيل نجيب", "كارلوس بيشوي عبده", 
+                "كيرلس امير عادل", "هاني عماد عزيز", "يوسف صفوت غطاس", 
+                "انجلو اشرف صبحي", "مينا مدحت مكرم", "ادم ميلاد عبد الملاك"
+            ]
+        }
+    };
+
+    let currentClassKey = 'grade1';
+    
+    // استبدل الرابط أدناه برابط Apps Script الخاص بك
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwXf2YzeEDtCh-sdXagCRRMc8RrQoDcEEc2e25kp-EiGq3NF54VqE7HdWuy6M2WBq8Big/exec"; 
+
+    // ضبط تاريخ اليوم تلقائياً
+    document.getElementById('attendanceDate').valueAsDate = new Date();
+
+    function switchClass(classKey) {
+        currentClassKey = classKey;
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', (classKey === 'grade1' && idx === 0) || 
+                                           (classKey === 'grade2' && idx === 1) || 
+                                           (classKey === 'grade3' && idx === 2));
+        });
+        renderStudents();
+    }
+
+    function renderStudents() {
+        const tbody = document.getElementById('studentsList');
+        tbody.innerHTML = '';
+        const students = classData[currentClassKey].students;
+
+        students.forEach((name, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td><strong>${name}</strong></td>
+                <td>
+                    <select class="status-select" data-name="${name}" data-status="غياب" onchange="this.setAttribute('data-status', this.value)">
+                        <option value="حضور">حضور</option>
+                        <option value="غياب" selected>غياب</option>
+                        <option value="اعتذار">اعتذار</option>
+                    </select>
+                </td>
+                <td><input type="text" class="note-input" data-name="${name}" placeholder="ملاحظات..."></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerText = "جاري الإرسال للتسجيل...";
+
+        const selectedDate = document.getElementById('attendanceDate').value;
+        const lessonTopic = document.getElementById('lessonTopic').value;
+        const servantName = document.getElementById('servantName').value;
+        const className = classData[currentClassKey].name;
+
+        const records = [];
+        const statusSelects = document.querySelectorAll('.status-select');
+        
+        statusSelects.forEach(select => {
+            const name = select.getAttribute('data-name');
+            const status = select.value;
+            const noteInput = document.querySelector(`.note-input[data-name="${name}"]`);
+            const notes = noteInput ? noteInput.value : '';
+
+            records.push({
+                name: name,
+                status: status,
+                notes: notes // إرسال ملاحظة المخدوم فقط إن وجدت
+            });
+        });
+
+        const payload = {
+            className: className,
+            selectedDate: selectedDate,
+            lessonTopic: lessonTopic,   // إرسال موضوع الدرس منفصلاً
+            servantName: servantName,   // إرسال اسم الخادم منفصلاً
+            records: records
+        };
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            alert(`تم تسجيل كشف (${className}) بتاريخ ${selectedDate} بنجاح!`);
+            btn.disabled = false;
+            btn.innerText = "إرسال كشف الفصل للشيت";
+        })
+        .catch(err => {
+            alert("حدث خطأ أثناء الإرسال، تحقق من الاتصال بالإنترنت.");
+            btn.disabled = false;
+            btn.innerText = "إرسال كشف الفصل للشيت";
+        });
+    });
+
+    renderStudents();
+</script>
+
+</body>
+</html>
