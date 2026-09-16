@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>كنيسة مارجرجس بشبين الكوم - خدمة إعدادي بنين</title>
     <style>
-   :root {
-    --primary-color: #5c1d24; /* عنابي داكن */
-    --accent-color: #8c2830;  /* عنابي فاتح */
-    --bg-color: #faf8f5;       /* أوف وايت دافئ */
-    --card-bg: #ffffff;
-    --border-color: #e8e2d8;
-}
+    :root {
+        --primary-color: #5c1d24; /* عنابي داكن */
+        --accent-color: #8c2830;  /* عنابي فاتح */
+        --bg-color: #faf8f5;       /* أوف وايت دافئ */
+        --card-bg: #ffffff;
+        --border-color: #e8e2d8;
+    }
 
         * {
             box-sizing: border-box;
@@ -65,36 +65,33 @@
         }
 
         /* التبويبات Tabs */
-        /* خلفية الشريط الكلي للتبويبات */
-.tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    background: #e2e8f0; /* يمكنك تغيير لون خلفية الشريط الحاوي هنا */
-    padding: 6px;
-    border-radius: 12px;
-}
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #e2e8f0;
+            padding: 6px;
+            border-radius: 12px;
+        }
 
-/* حالة الأزرار العادية (غير النشطة) */
-.tab-btn {
-    flex: 1;
-    padding: 10px 6px;
-    border: none;
-    background: #cbd5e0; /* لون خلفية الزر غير المفعّل */
-    color: #2d3748;      /* لون الخط في الزر غير المفعّل */
-    font-weight: 700;
-    font-size: 13px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
+        .tab-btn {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            background: #cbd5e0;
+            color: #2d3748;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
 
-/* حالة الزر المفعّل (الصف المحدد حالياً) */
-.tab-btn.active {
-    background: var(--primary-color); /* يمكنك استبدالها بلون خاص مثل #2b6cb0 أو أي لون هكس */
-    color: #ffffff;                    /* لون الخط أبيض في الزر المفعّل */
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
 
         /* بيانات النشاط والتاريخ */
         .meta-card {
@@ -257,7 +254,7 @@
         <div class="meta-card">
             <div class="form-group">
                 <label>اسم الخدمة:</label>
-                <select id="activityType" class="form-control" onchange="toggleLessonFields()" required>
+                <select id="activityType" class="form-control" onchange="resetAllToAbsent(); toggleLessonFields();" required>
                     <option value="التسبحة">التسبحة</option>
                     <option value="مدارس الأحد">مدارس الأحد</option>
                     <option value="الخورس">الخورس</option>
@@ -422,6 +419,10 @@
         });
     }
 
+    function resetAllToAbsent() {
+        renderStudents();
+    }
+
     document.getElementById('attendanceForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
@@ -461,13 +462,17 @@
         })
         .then(() => {
             alert(`تم تسجيل (${activityType}) لـ ${className} بنجاح!`);
+            
+            // إعادة ضبط جميع المخدومين إلى وضع غياب
+            resetAllToAbsent();
+
             btn.disabled = false;
-            btn.innerText = "إرسال كشف النشاط للشيت";
+            btn.innerText = "إرسال الكشف للشيت";
         })
         .catch(err => {
             alert("حدث خطأ أثناء الإرسال.");
             btn.disabled = false;
-            btn.innerText = "إرسال كشف النشاط للشيت";
+            btn.innerText = "إرسال الكشف للشيت";
         });
     });
 
